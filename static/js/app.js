@@ -1,17 +1,25 @@
 function buildMetadata(sample) {
+
+    // @TODO: Complete the following function that builds the metadata panel
+
     // Use `d3.json` to fetch the metadata for a sample
+    // Use d3 to select the panel with id of `#sample-metadata`
     var metadata = d3.select("#sample-metadata");
     var url = "/metadata/" + sample;
 
     d3.json(url).then(function (response) {
         console.log(response);
         $("#sample-metadata").empty();
+        // Use `.html("") to clear any existing metadata
+
+        // Use `Object.entries` to add each key and value pair to the panel
+        // Hint: Inside the loop, you will need to use d3 to append new
+        // tags for each key-value in the metadata.
         Object.entries(response).forEach(([key, value]) => metadata.append("p").text(`${key}: ${value}`));
     });
 }
-
 // BONUS: Build the Gauge Chart
-
+// buildGauge(data.WFREQ);
 function buildGauge(sample) {
     var url = "/metadata/" + sample;
     d3.json(url).then(function (response) {
@@ -117,6 +125,7 @@ function buildGauge(sample) {
 
 function buildCharts(sample) {
     var url = "/samples/" + sample;
+    // @TODO: Use `d3.json` to fetch the sample data for the plots
     d3.json(url).then(function (response) {
         console.log(response);
         var filtered_values = [];
@@ -141,17 +150,20 @@ function buildCharts(sample) {
             annotations: [
                 {
                     font: {
-                        size: 12
+                        size: 15
                     },
                     showarrow: false,
                     text: "Top 10 Samples",
-                    x: 0.5,
+                    x: 0.3,
                     y: 0.5
         }
       ],
             height: 500,
             width: 500
         };
+        // @TODO: Build a Pie Chart
+        // HINT: You will need to use slice() to grab the top 10 sample_values,
+        // otu_ids, and labels (10 each).
         var trace1 = [{
             type: "pie",
             values: filtered_values,
@@ -174,6 +186,7 @@ function buildCharts(sample) {
                 size: response.sample_values
             }
     }];
+        // @TODO: Build a Bubble Chart using the sample data
         var layout2 = {
             title: 'Bubble chart for each sample',
             showlegend: false,
@@ -185,10 +198,11 @@ function buildCharts(sample) {
     });
 }
 
-
 function init() {
-
+    // Grab a reference to the dropdown select element
     var selector = d3.select("#selDataset");
+
+    // Use the list of sample names to populate the select options
     d3.json("/names").then((sampleNames) => {
         sampleNames.forEach((sample) => {
             selector
@@ -197,6 +211,7 @@ function init() {
                 .property("value", sample);
         });
 
+        // Use the first sample from the list to build the initial plots
         const firstSample = sampleNames[0];
         buildCharts(firstSample);
         buildMetadata(firstSample);
@@ -205,15 +220,16 @@ function init() {
 }
 
 function optionChanged(newSample) {
+    // Fetch new data each time a new sample is selected
     buildCharts(newSample);
     buildMetadata(newSample);
     buildGauge(newSample);
 }
 
-$('select').on('change', function () {
+$('select').on('change',function(){
     var Sample = d3.select("#selDataset").property('value');
     console.log(Sample);
     optionChanged(Sample);
 });
-
+// Initialize the dashboard
 init();
